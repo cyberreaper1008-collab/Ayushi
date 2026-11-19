@@ -1,0 +1,156 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User preferences, voice settings, HUD theme, and assistant instructions.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "displayName": { "type": "string" },
+        "preferredLanguage": { "type": "string", "enum": ["Hinglish", "English", "Hindi"] },
+        "speechSpeed": { "type": "number" },
+        "speechPitch": { "type": "number" },
+        "continuousVoice": { "type": "boolean" },
+        "wakeWordEnabled": { "type": "boolean" },
+        "hudTheme": { "type": "string", "enum": ["ARC_CYAN", "STARK_GOLD", "STEALTH_NAVY"] },
+        "confirmSensitiveActions": { "type": "boolean" },
+        "autoSaveMemories": { "type": "boolean" },
+        "notificationsEnabled": { "type": "boolean" },
+        "customInstructions": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "displayName", "preferredLanguage", "speechSpeed", "speechPitch", "continuousVoice", "wakeWordEnabled", "hudTheme", "confirmSensitiveActions", "autoSaveMemories", "notificationsEnabled", "customInstructions", "createdAt", "updatedAt"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "Conversation turn between user and JARVIS.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "model", "system"] },
+        "text": { "type": "string" },
+        "mode": { "type": "string", "enum": ["ASSISTANT", "STUDY", "RESEARCH"] },
+        "attachmentLabel": { "type": "string" },
+        "actionSummary": { "type": "string" },
+        "sources": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "role", "text", "mode", "createdAt", "updatedAt"]
+    },
+    "ProductivityTask": {
+      "title": "ProductivityTask",
+      "description": "Task, reminder, habit, or study timetable item.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "details": { "type": "string" },
+        "category": { "type": "string", "enum": ["TASK", "REMINDER", "HABIT", "STUDY"] },
+        "priority": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW"] },
+        "completed": { "type": "boolean" },
+        "dueLabel": { "type": "string" },
+        "streakCount": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "details", "category", "priority", "completed", "dueLabel", "streakCount", "createdAt", "updatedAt"]
+    },
+    "JarvisNote": {
+      "title": "JarvisNote",
+      "description": "User or AI-generated note.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "tag": { "type": "string" },
+        "pinned": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "content", "tag", "pinned", "createdAt", "updatedAt"]
+    },
+    "PersonalMemory": {
+      "title": "PersonalMemory",
+      "description": "User-approved long-term memory entry.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "keyLabel": { "type": "string" },
+        "fact": { "type": "string" },
+        "category": { "type": "string", "enum": ["PREFERENCE", "PROJECT", "STUDY", "GENERAL"] },
+        "approved": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "keyLabel", "fact", "category", "approved", "createdAt", "updatedAt"]
+    },
+    "SmartRoutine": {
+      "title": "SmartRoutine",
+      "description": "Customizable smart automation routine.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "triggerPhrase": { "type": "string" },
+        "routineType": { "type": "string", "enum": ["MORNING", "STUDY", "REMINDER", "PLANNING", "NIGHT", "CUSTOM"] },
+        "actionSteps": { "type": "array" },
+        "enabled": { "type": "boolean" },
+        "requiresConfirmation": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name", "triggerPhrase", "routineType", "actionSteps", "enabled", "requiresConfirmation", "createdAt", "updatedAt"]
+    },
+    "StudyProgress": {
+      "title": "StudyProgress",
+      "description": "Study assistant progress and subject mastery record.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "subject": { "type": "string" },
+        "topic": { "type": "string" },
+        "examTrack": { "type": "string", "enum": ["JEE", "NEET", "BOARD", "GENERAL"] },
+        "masteryPercent": { "type": "integer" },
+        "questionsSolved": { "type": "integer" },
+        "correctCount": { "type": "integer" },
+        "notesSummary": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "subject", "topic", "examTrack", "masteryPercent", "questionsSolved", "correctCount", "notesSummary", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User preferences and assistant configuration."
+    },
+    "/users/{userId}/conversations/{messageId}": {
+      "schema": { "$ref": "#/entities/ChatMessage" },
+      "description": "Multi-turn conversation messages with JARVIS."
+    },
+    "/users/{userId}/tasks/{taskId}": {
+      "schema": { "$ref": "#/entities/ProductivityTask" },
+      "description": "User tasks, reminders, habits, and study timetable items."
+    },
+    "/users/{userId}/notes/{noteId}": {
+      "schema": { "$ref": "#/entities/JarvisNote" },
+      "description": "Saved notes and AI summaries."
+    },
+    "/users/{userId}/memories/{memoryId}": {
+      "schema": { "$ref": "#/entities/PersonalMemory" },
+      "description": "User-approved personal memories and ongoing projects."
+    },
+    "/users/{userId}/routines/{routineId}": {
+      "schema": { "$ref": "#/entities/SmartRoutine" },
+      "description": "User-configured smart automation routines."
+    },
+    "/users/{userId}/study_logs/{logId}": {
+      "schema": { "$ref": "#/entities/StudyProgress" },
+      "description": "Study progress and MCQ performance records."
+    }
+  }
+}

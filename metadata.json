@@ -1,0 +1,8 @@
+{
+  "name": "Jarvis",
+  "description": "JARVIS — Just A Rather Very Intelligent System, a futuristic personal AI phone assistant powered by Gemini.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

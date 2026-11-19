@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Jarvis</string>
+    <string name="jarvis_full_name">Just A Rather Very Intelligent System</string>
+    <string name="jarvis_hud_title">J.A.R.V.I.S.</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="status_system_online">SYSTEM ONLINE</string>
+    <string name="status_listening">LISTENING</string>
+    <string name="status_thinking">THINKING</string>
+    <string name="status_processing">PROCESSING</string>
+    <string name="status_speaking">SPEAKING</string>
+    <string name="status_task_completed">TASK COMPLETED</string>
+    <string name="error_generic">Unable to complete request. Please try again.</string>
+    <string name="error_mic_permission">Microphone permission is required for voice commands.</string>
+    <string name="privacy_notice">JARVIS only accesses data and device actions you explicitly authorize. Sensitive actions always request confirmation.</string>
+</resources>

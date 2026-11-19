@@ -1,0 +1,221 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidUserProfile(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 80 &&
+             data.preferredLanguage in ['Hinglish', 'English', 'Hindi'] &&
+             data.speechSpeed is number && data.speechSpeed >= 0.5 && data.speechSpeed <= 2.0 &&
+             data.speechPitch is number && data.speechPitch >= 0.5 && data.speechPitch <= 1.8 &&
+             data.continuousVoice is bool &&
+             data.wakeWordEnabled is bool &&
+             data.hudTheme in ['ARC_CYAN', 'STARK_GOLD', 'STEALTH_NAVY'] &&
+             data.confirmSensitiveActions is bool &&
+             data.autoSaveMemories is bool &&
+             data.notificationsEnabled is bool &&
+             data.customInstructions is string && data.customInstructions.size() <= 1000 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidChatMessage(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.role in ['user', 'model', 'system'] &&
+             data.text is string && data.text.size() >= 1 && data.text.size() <= 16000 &&
+             data.mode in ['ASSISTANT', 'STUDY', 'RESEARCH'] &&
+             (!('attachmentLabel' in data) || (data.attachmentLabel is string && data.attachmentLabel.size() <= 200)) &&
+             (!('actionSummary' in data) || (data.actionSummary is string && data.actionSummary.size() <= 400)) &&
+             (!('sources' in data) || (data.sources is list && data.sources.size() <= 10 && (data.sources.size() == 0 || data.sources[0] is string))) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidProductivityTask(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+             data.details is string && data.details.size() <= 1000 &&
+             data.category in ['TASK', 'REMINDER', 'HABIT', 'STUDY'] &&
+             data.priority in ['HIGH', 'MEDIUM', 'LOW'] &&
+             data.completed is bool &&
+             data.dueLabel is string && data.dueLabel.size() <= 100 &&
+             data.streakCount is int && data.streakCount >= 0 && data.streakCount <= 10000 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidJarvisNote(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 160 &&
+             data.content is string && data.content.size() >= 1 && data.content.size() <= 8000 &&
+             data.tag is string && data.tag.size() <= 40 &&
+             data.pinned is bool &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidPersonalMemory(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.keyLabel is string && data.keyLabel.size() >= 1 && data.keyLabel.size() <= 100 &&
+             data.fact is string && data.fact.size() >= 1 && data.fact.size() <= 500 &&
+             data.category in ['PREFERENCE', 'PROJECT', 'STUDY', 'GENERAL'] &&
+             data.approved is bool &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidSmartRoutine(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+             data.triggerPhrase is string && data.triggerPhrase.size() >= 1 && data.triggerPhrase.size() <= 100 &&
+             data.routineType in ['MORNING', 'STUDY', 'REMINDER', 'PLANNING', 'NIGHT', 'CUSTOM'] &&
+             data.actionSteps is list && data.actionSteps.size() >= 1 && data.actionSteps.size() <= 10 && data.actionSteps[0] is string &&
+             data.enabled is bool &&
+             data.requiresConfirmation is bool &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidStudyProgress(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.subject is string && data.subject.size() >= 1 && data.subject.size() <= 60 &&
+             data.topic is string && data.topic.size() >= 1 && data.topic.size() <= 150 &&
+             data.examTrack in ['JEE', 'NEET', 'BOARD', 'GENERAL'] &&
+             data.masteryPercent is int && data.masteryPercent >= 0 && data.masteryPercent <= 100 &&
+             data.questionsSolved is int && data.questionsSolved >= 0 && data.questionsSolved <= 10000 &&
+             data.correctCount is int && data.correctCount >= 0 && data.correctCount <= 10000 &&
+             data.notesSummary is string && data.notesSummary.size() <= 2000 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidId(userId) &&
+                       incoming().keys().hasAll(['userId', 'displayName', 'preferredLanguage', 'speechSpeed', 'speechPitch', 'continuousVoice', 'wakeWordEnabled', 'hudTheme', 'confirmSensitiveActions', 'autoSaveMemories', 'notificationsEnabled', 'customInstructions', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'displayName', 'preferredLanguage', 'speechSpeed', 'speechPitch', 'continuousVoice', 'wakeWordEnabled', 'hudTheme', 'confirmSensitiveActions', 'autoSaveMemories', 'notificationsEnabled', 'customInstructions', 'createdAt', 'updatedAt']) &&
+                       isValidUserProfile(incoming(), userId);
+      allow update: if isOwner(userId) && isValidId(userId) &&
+                       isValidUserProfile(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'preferredLanguage', 'speechSpeed', 'speechPitch', 'continuousVoice', 'wakeWordEnabled', 'hudTheme', 'confirmSensitiveActions', 'autoSaveMemories', 'notificationsEnabled', 'customInstructions', 'updatedAt']);
+      allow delete: if isOwner(userId) && isValidId(userId);
+
+      match /conversations/{messageId} {
+        allow get: if isOwner(userId) && isValidId(messageId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(messageId) &&
+                         incoming().keys().hasAll(['userId', 'role', 'text', 'mode', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly(['userId', 'role', 'text', 'mode', 'attachmentLabel', 'actionSummary', 'sources', 'createdAt', 'updatedAt']) &&
+                         isValidChatMessage(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(messageId) &&
+                         isValidChatMessage(incoming(), userId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly(['text', 'actionSummary', 'sources', 'updatedAt']);
+        allow delete: if isOwner(userId) && isValidId(messageId);
+      }
+
+      match /tasks/{taskId} {
+        allow get: if isOwner(userId) && isValidId(taskId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(taskId) &&
+                         incoming().keys().hasAll(['userId', 'title', 'details', 'category', 'priority', 'completed', 'dueLabel', 'streakCount', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly(['userId', 'title', 'details', 'category', 'priority', 'completed', 'dueLabel', 'streakCount', 'createdAt', 'updatedAt']) &&
+                         isValidProductivityTask(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(taskId) &&
+                         isValidProductivityTask(incoming(), userId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly(['title', 'details', 'category', 'priority', 'completed', 'dueLabel', 'streakCount', 'updatedAt']);
+        allow delete: if isOwner(userId) && isValidId(taskId);
+      }
+
+      match /notes/{noteId} {
+        allow get: if isOwner(userId) && isValidId(noteId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(noteId) &&
+                         incoming().keys().hasAll(['userId', 'title', 'content', 'tag', 'pinned', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly(['userId', 'title', 'content', 'tag', 'pinned', 'createdAt', 'updatedAt']) &&
+                         isValidJarvisNote(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(noteId) &&
+                         isValidJarvisNote(incoming(), userId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly(['title', 'content', 'tag', 'pinned', 'updatedAt']);
+        allow delete: if isOwner(userId) && isValidId(noteId);
+      }
+
+      match /memories/{memoryId} {
+        allow get: if isOwner(userId) && isValidId(memoryId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(memoryId) &&
+                         incoming().keys().hasAll(['userId', 'keyLabel', 'fact', 'category', 'approved', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly(['userId', 'keyLabel', 'fact', 'category', 'approved', 'createdAt', 'updatedAt']) &&
+                         isValidPersonalMemory(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(memoryId) &&
+                         isValidPersonalMemory(incoming(), userId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly(['keyLabel', 'fact', 'category', 'approved', 'updatedAt']);
+        allow delete: if isOwner(userId) && isValidId(memoryId);
+      }
+
+      match /routines/{routineId} {
+        allow get: if isOwner(userId) && isValidId(routineId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(routineId) &&
+                         incoming().keys().hasAll(['userId', 'name', 'triggerPhrase', 'routineType', 'actionSteps', 'enabled', 'requiresConfirmation', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly(['userId', 'name', 'triggerPhrase', 'routineType', 'actionSteps', 'enabled', 'requiresConfirmation', 'createdAt', 'updatedAt']) &&
+                         isValidSmartRoutine(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(routineId) &&
+                         isValidSmartRoutine(incoming(), userId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly(['name', 'triggerPhrase', 'routineType', 'actionSteps', 'enabled', 'requiresConfirmation', 'updatedAt']);
+        allow delete: if isOwner(userId) && isValidId(routineId);
+      }
+
+      match /study_logs/{logId} {
+        allow get: if isOwner(userId) && isValidId(logId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(logId) &&
+                         incoming().keys().hasAll(['userId', 'subject', 'topic', 'examTrack', 'masteryPercent', 'questionsSolved', 'correctCount', 'notesSummary', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly(['userId', 'subject', 'topic', 'examTrack', 'masteryPercent', 'questionsSolved', 'correctCount', 'notesSummary', 'createdAt', 'updatedAt']) &&
+                         isValidStudyProgress(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(logId) &&
+                         isValidStudyProgress(incoming(), userId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly(['subject', 'topic', 'examTrack', 'masteryPercent', 'questionsSolved', 'correctCount', 'notesSummary', 'updatedAt']);
+        allow delete: if isOwner(userId) && isValidId(logId);
+      }
+    }
+  }
+}
